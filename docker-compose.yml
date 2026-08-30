@@ -1,0 +1,57 @@
+# Docker Compose configuration for local development
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: collexa-db
+    environment:
+      POSTGRES_USER: collexa
+      POSTGRES_PASSWORD: collexa_secure_password
+      POSTGRES_DB: collexa_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # FastAPI Backend
+  backend:
+    build: ./backend
+    container_name: collexa-backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://collexa:collexa_secure_password@db:5432/collexa_db
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: development
+      ALLOWED_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - chroma_data:/app/chroma_data
+    links:
+      - db
+
+  # Next.js Frontend
+  frontend:
+    build: ./frontend
+    container_name: collexa-frontend
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    links:
+      - backend
+
+volumes:
+  postgres_data:
+  chroma_data:

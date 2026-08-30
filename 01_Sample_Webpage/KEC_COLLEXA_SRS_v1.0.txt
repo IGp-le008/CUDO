@@ -1,0 +1,1665 @@
+SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+
+Project Title:
+Kathmandu Engineering College (KEC) Smart Web Portal with COLLEXA AI Agent
+
+Version:
+1.0
+
+Date:
+28 August 2026
+
+
+1. INTRODUCTION
+
+1.1 Purpose
+
+This Software Requirements Specification (SRS) defines the functional and non-functional requirements for a web-based smart college portal for Kathmandu Engineering College (KEC). The system will combine a modern college website, student and administration portals, admission/seat booking services, appointment management, result checking, and an AI-powered conversational agent named COLLEXA.
+
+COLLEXA will act as an intelligent natural-language interface through which users can obtain general KEC information and, where authorized, perform supported college services such as checking results, booking appointments, checking seat availability, reserving admission seats, and confirming registration.
+
+This document is intended for project developers, designers, testers, administrators, college stakeholders, and future maintainers.
+
+
+1.2 Scope
+
+The system will provide the following major capabilities:
+
+- Public KEC information website
+- COLLEXA AI conversational agent
+- RAG-based KEC information retrieval
+- Student registration and login
+- Student dashboard
+- Student result lookup using authenticated student identity/IOE Roll Number
+- Appointment booking with faculty/administration
+- Engineering program seat availability
+- Admission seat reservation
+- Registration confirmation
+- QR-based registration verification
+- Administrator login and dashboard
+- Student, result, seat, booking, appointment, program, and notice management
+- KEC document and knowledge-base management
+- Role-based access control
+- Audit and security controls
+- Notice and Recent Updates 
+- News Sections 
+- Gallery consisting image/videos of the KEC college in the website
+
+Initial academic programs covered by the admission booking module:
+
+- Computer Engineering
+- Communication, Electronics and IT Engineering
+- Electrical Engineering
+- Architecture
+- Civil Engineering
+
+The system should be designed so additional programs can be added later.
+
+
+1.3 Definitions and Acronyms
+
+KEC:
+Kathmandu Engineering College.
+
+COLLEXA:
+The AI-powered conversational college assistant integrated into the KEC portal.
+
+AI:
+Artificial Intelligence.
+
+LLM:
+Large Language Model.
+
+RAG:
+Retrieval-Augmented Generation.
+
+RBAC:
+Role-Based Access Control.
+
+API:
+Application Programming Interface.
+
+JWT:
+JSON Web Token.
+
+QR:
+Quick Response code.
+
+IOE:
+Institute of Engineering.
+
+Student:
+An authenticated KEC student using student services.
+
+Admin:
+An authorized administrator responsible for managing system data and operations.
+
+Booking:
+A temporary reservation of an available seat.
+
+Registration:
+A confirmed admission/seat booking after the user explicitly confirms registration.
+
+
+1.4 Intended Audience
+
+This SRS is intended for:
+
+- Software developers
+- Frontend developers
+- Backend developers
+- AI/ML developers
+- Database developers
+- UI/UX designers
+- QA/test engineers
+- KEC administrators
+- Project supervisors
+- Future system maintainers
+- End users
+- Both domain expert/non-experts
+
+
+1.5 Product Perspective
+
+The system will consist of a public web portal, authenticated student portal, authenticated admin portal, backend APIs, database, AI agent, vector database, and document knowledge base.
+
+High-level architecture:
+
+			User
+			  |
+			  v
+			KEC Web Portal
+			  |
+			  +-----------------------------------+
+			  |                  		  |
+			  v                  		  v
+			Public Portal    		Authenticated Portal
+			  |				  |	
+			  v				  v
+			 COLLEXA      			Backend API
+		            |				  |
+		     +------+------+			+------------+------------+
+		     |             |			|	    |	         |
+		     v             v
+		  RAG System      Service Tools	      PostgreSQL     COLLEXA      Auth/RBAC
+		     |             |				       |	
+		     v       +-----+-----+-----+		|	+------+------+
+		  ChromaDB   |     |     |     |	    RAG System  Results Booking Appointments
+		             v     v     v     v		|
+		          Results Booking Appointments	Chroma DB
+		                 Seats					   |
+					   
+					
+
+
+2. OVERALL DESCRIPTION
+
+2.1 Product Functions
+
+The system shall:
+
+1. Present official KEC information through a public website.
+2. Allow users to interact with COLLEXA.
+3. Answer general KEC-related questions using an approved knowledge base.
+4. Authenticate students and administrators.
+5. Provide authenticated students with personalized services.
+6. Allow students to view their academic results.
+7. Allow students to request and manage appointments.
+8. Display live seat availability for supported engineering programs.
+9. Allow eligible users to reserve available seats.
+10. Allow users to explicitly confirm registration.
+11. Generate a QR registration credential after successful confirmation.
+12. Allow authorized administrators to manage system information.
+13. Provide administrators with booking, seat, student, result, and appointment information.
+14. Allow authorized personnel to update the COLLEXA knowledge base.
+15. Maintain logs/audit records for important administrative and transactional actions.
+
+
+2.2 User Classes
+
+2.2.1 Public User
+
+A visitor who has not authenticated.
+
+Permissions:
+
+- Browse public KEC information
+- View programs
+- View admission information
+- View notices
+- View departments
+- View contact information
+- Ask general questions to COLLEXA
+- View public seat availability, if enabled
+- Access login/register pages
+
+
+2.2.2 Student
+
+An authenticated KEC student.
+
+Permissions:
+
+- Access student dashboard
+- View own profile
+- View own results
+- View permitted academic information
+- Book appointments
+- View/cancel own appointments
+- Check program seat availability
+- Make permitted seat reservations
+- Confirm registration
+- Access generated QR registration credential
+- Interact with authenticated COLLEXA services
+
+
+2.2.3 Administrator
+
+An authenticated authorized administrator.
+
+Permissions may include:
+
+- Access admin dashboard
+- Manage students
+- Manage programs
+- Manage seats
+- Manage results
+- Manage appointments
+- Manage bookings
+- Manage registrations
+- Publish/manage notices
+- Upload/manage knowledge-base documents
+- View system statistics
+- Review audit logs
+- Manage selected system settings
+
+
+2.2.4 Super Administrator
+
+Optional higher-privilege role.
+
+Additional permissions:
+
+- Create/remove administrators
+- Assign roles
+- Configure system-wide settings
+- Manage sensitive security settings
+- Access all administrative functions
+
+
+3. SYSTEM FEATURES AND FUNCTIONAL REQUIREMENTS
+
+3.1 Public Website
+
+FR-001:
+The system shall provide a responsive KEC homepage.
+
+FR-002:
+The homepage shall provide navigation to major public sections.
+
+FR-003:
+The system shall provide an About KEC section.
+
+FR-004:
+The system shall provide academic/program information.
+
+FR-005:
+The system shall provide department information.
+
+FR-006:
+The system shall provide admission information.
+
+FR-007:
+The system shall provide notices and announcements.
+
+FR-008:
+The system shall provide contact information.
+
+FR-009:
+The system shall provide links to student and administrator login.
+
+
+3.2 COLLEXA AI Agent
+
+FR-010:
+The system shall provide COLLEXA as a conversational interface.
+
+FR-011:
+COLLEXA shall accept natural-language user queries.
+
+FR-012:
+COLLEXA shall identify the likely intent of a user request.
+
+FR-013:
+COLLEXA shall answer public KEC information queries using the approved knowledge base.
+
+FR-014:
+COLLEXA shall use RAG for information that depends on KEC documents.
+
+FR-015:
+COLLEXA shall provide source-aware answers where appropriate.
+
+FR-016:
+COLLEXA shall avoid presenting unsupported information as official KEC information.
+
+FR-017:
+COLLEXA shall recognize when a request requires authentication.
+
+FR-018:
+COLLEXA shall recognize when a request requires a backend service/tool.
+
+FR-019:
+COLLEXA shall call only authorized backend tools.
+
+FR-020:
+COLLEXA shall not directly execute unrestricted SQL/database queries.
+
+FR-021:
+COLLEXA shall request confirmation before sensitive or consequential actions.
+
+FR-022:
+COLLEXA shall provide meaningful error messages if a requested operation cannot be completed.
+
+Example supported intents:
+
+- General information
+- Admissions
+- Programs
+- Notices
+- Results
+- Appointments
+- Seat availability
+- Seat reservation
+- Registration confirmation
+- Registration verification
+
+
+3.3 COLLEXA Public Information Tools
+
+The backend shall expose controlled tools/functions such as:
+
+- search_kec_information()
+- get_program_information()
+- get_admission_information()
+- get_department_information()
+- get_notice()
+- get_contact_information()
+- check_public_seat_availability()
+
+These functions shall return only information that is permitted for public access.
+
+
+3.4 Student Authentication
+
+FR-023:
+The system shall provide a student login interface.
+
+FR-024:
+Student authentication shall use securely stored password hashes or an approved authentication mechanism.
+
+FR-025:
+The system shall create an authenticated session/token after successful login.
+
+FR-026:
+The system shall support role-based authorization.
+
+FR-027:
+The system shall prevent unauthenticated users from accessing protected student information.
+
+FR-028:
+The system shall provide logout functionality.
+
+FR-029:
+The system should provide password recovery or account recovery mechanisms where applicable.
+
+
+3.5 Student Dashboard
+
+FR-030:
+The system shall provide an authenticated student dashboard.
+
+FR-031:
+The dashboard shall display basic student information.
+
+FR-032:
+The dashboard shall provide navigation to results.
+
+FR-033:
+The dashboard shall provide navigation to appointments.
+
+FR-034:
+The dashboard shall provide admission/seat booking services.
+
+FR-035:
+The dashboard shall provide access to COLLEXA.
+
+
+3.6 Student Result System
+
+FR-036:
+The system shall maintain student academic result records.
+
+FR-037:
+An authenticated student shall be able to view their own results.
+
+FR-038:
+The system shall support results organized by semester.
+
+FR-039:
+The result interface shall display subjects and grades/marks as configured by KEC.
+
+FR-040:
+The system may calculate/display SGPA and CGPA when sufficient official data is available.
+
+FR-041:
+COLLEXA shall be able to retrieve the authenticated student's result through a controlled backend tool.
+
+FR-042:
+The system shall not expose another student's result merely because a user supplies another IOE Roll Number.
+
+FR-043:
+Access to private result information shall require appropriate authentication/authorization.
+
+Example tool:
+
+get_my_result(student_id, semester)
+
+
+3.7 Appointment Booking
+
+FR-044:
+The system shall allow authorized students to request appointments.
+
+FR-045:
+The system shall maintain faculty/appointment-provider records.
+
+FR-046:
+The system shall display available appointment slots.
+
+FR-047:
+Students shall be able to select an available date and time.
+
+FR-048:
+The system shall create an appointment record.
+
+FR-049:
+Appointments shall have statuses such as:
+
+- Pending
+- Approved
+- Rejected
+- Cancelled
+- Completed
+
+FR-050:
+Students shall be able to view their own appointments.
+
+FR-051:
+Students shall be able to cancel appointments according to configured rules.
+
+FR-052:
+Administrators shall be able to review and manage appointments.
+
+FR-053:
+COLLEXA shall be able to assist with appointment booking through controlled tools.
+
+
+3.8 Program and Seat Management
+
+FR-054:
+The system shall maintain engineering program records.
+
+FR-055:
+Each program shall have configurable seat capacity.
+
+FR-056:
+The system shall track available seats.
+
+FR-057:
+The system shall support at least:
+
+- Computer Engineering
+- Electronics Engineering
+- Electrical Engineering
+- Architecture
+
+FR-058:
+Administrators shall be able to update seat capacity/availability according to authorized business rules.
+
+FR-059:
+Users shall be able to view available seats when permitted.
+
+FR-060:
+The system shall prevent bookings when no eligible seat is available.
+
+FR-061:
+The system shall protect seat counts from race conditions during simultaneous bookings.
+
+
+3.9 Seat Reservation
+
+FR-062:
+An eligible user shall be able to request a seat reservation.
+
+FR-063:
+The system shall verify seat availability before creating a reservation.
+
+FR-064:
+The system shall create a unique booking/reservation ID.
+
+FR-065:
+A booking shall have a status.
+
+Possible statuses:
+
+- Reserved
+- Confirmed
+- Cancelled
+- Expired
+
+FR-066:
+The system shall record creation time and expiration time for temporary reservations.
+
+FR-067:
+Expired reservations shall release the associated seat according to configured rules.
+
+FR-068:
+The system shall not allow a user to reserve more seats than permitted.
+
+FR-069:
+COLLEXA shall confirm the reservation result to the user.
+
+Example:
+
+Program: Electronics Engineering
+Available seats: 7
+Reservation ID: KEC-2026-01829
+Status: RESERVED
+
+
+3.10 Registration Confirmation
+
+FR-070:
+The system shall distinguish between a temporary booking and confirmed registration.
+
+FR-071:
+A user shall explicitly confirm before a reservation becomes a confirmed registration.
+
+FR-072:
+The system shall show the relevant registration information before final confirmation.
+
+FR-073:
+The system shall prevent accidental confirmation without explicit user action.
+
+FR-074:
+After successful confirmation, the system shall create a registration record.
+
+FR-075:
+The system shall generate a unique registration token/identifier.
+
+FR-076:
+The system shall generate a QR code associated with the registration token.
+
+FR-077:
+The QR code shall not expose unnecessary sensitive student information.
+
+FR-078:
+The QR code shall allow authorized verification of registration status.
+
+FR-079:
+A registration shall have a status such as:
+
+- Confirmed
+- Cancelled
+- Expired, where applicable
+
+
+3.11 QR Verification
+
+FR-080:
+The system shall provide a registration verification endpoint/page.
+
+FR-081:
+The verification system shall validate the registration token.
+
+FR-082:
+The verification result shall indicate whether the registration is valid.
+
+FR-083:
+The verification page shall display only information appropriate for verification.
+
+Example:
+
+KEC Registration
+Registration ID: KEC-2026-01829
+Program: Electronics Engineering
+Status: CONFIRMED
+Verified: YES
+
+
+3.12 Admin Authentication
+
+FR-084:
+The system shall provide a separate administrator login interface.
+
+FR-085:
+Administrator access shall require authentication.
+
+FR-086:
+Administrator accounts shall use role-based authorization.
+
+FR-087:
+Unauthorized users shall be denied access to administrative functions.
+
+FR-088:
+Administrative actions involving sensitive data shall be logged.
+
+
+3.13 Admin Dashboard
+
+FR-089:
+The system shall provide an administrator dashboard.
+
+The dashboard may display:
+
+- Total students
+- Total applications
+- Active bookings
+- Confirmed registrations
+- Pending appointments
+- Available seats
+- Recent notices
+- Recent system activity
+
+FR-090:
+The dashboard shall provide navigation to administrative modules.
+
+
+3.14 Student Management
+
+FR-091:
+Authorized administrators shall be able to create student records.
+
+FR-092:
+Authorized administrators shall be able to update student records.
+
+FR-093:
+Authorized administrators shall be able to search students.
+
+FR-094:
+Student records shall include, where applicable:
+
+- Student ID
+- Name
+- IOE Roll Number
+- Program
+- Batch
+- Semester
+- Contact information
+- Account status
+
+FR-095:
+Access to sensitive student data shall be restricted by role.
+
+
+3.15 Result Management
+
+FR-096:
+Authorized administrators shall be able to add/update student results.
+
+FR-097:
+The system shall associate results with the correct student.
+
+FR-098:
+The system shall associate results with the correct semester.
+
+FR-099:
+The system shall maintain an audit trail for important result modifications.
+
+FR-100:
+Only authorized users shall be able to modify official result records.
+
+
+3.16 Program and Seat Administration
+
+FR-101:
+Authorized administrators shall be able to create/edit programs.
+
+FR-102:
+Authorized administrators shall be able to configure seat capacity.
+
+FR-103:
+The system shall prevent invalid negative seat counts.
+
+FR-104:
+The system shall maintain consistency between bookings, registrations, and available seats.
+
+
+3.17 Notice Management
+
+FR-105:
+Authorized administrators shall be able to create notices.
+
+FR-106:
+Authorized administrators shall be able to edit notices.
+
+FR-107:
+Authorized administrators shall be able to publish/unpublish notices.
+
+FR-108:
+Published notices shall be available through the public website.
+
+FR-109:
+COLLEXA shall be able to retrieve published notices.
+
+
+3.18 Knowledge Base Management
+
+FR-110:
+Authorized administrators shall be able to upload approved KEC documents.
+
+FR-111:
+The system shall process supported documents for the COLLEXA knowledge base.
+
+FR-112:
+Documents shall be chunked and indexed for retrieval.
+
+FR-113:
+The system shall store embeddings in the configured vector database.
+
+FR-114:
+Administrators shall be able to remove or replace outdated documents.
+
+FR-115:
+The system should maintain document metadata such as:
+
+- Document name
+- Category
+- Version
+- Upload date
+- Status
+- Source/department
+
+
+3.19 Audit Logging
+
+FR-116:
+The system shall record important security and transactional events.
+
+Events may include:
+
+- Login
+- Logout
+- Failed login
+- Result modification
+- Seat modification
+- Booking creation
+- Booking cancellation
+- Registration confirmation
+- QR verification
+- Administrative changes
+- Knowledge-base document changes
+
+FR-117:
+Audit records shall be accessible only to authorized administrators.
+
+
+4. NON-FUNCTIONAL REQUIREMENTS
+
+4.1 Performance
+
+NFR-001:
+Normal public pages should load within an acceptable time under normal network conditions.
+
+NFR-002:
+Typical API requests should return within a few seconds under normal load.
+
+NFR-003:
+COLLEXA responses should be optimized to minimize unnecessary latency.
+
+NFR-004:
+Database queries shall use appropriate indexing.
+
+NFR-005:
+Seat booking transactions shall maintain data consistency under concurrent requests.
+
+
+4.2 Security
+
+NFR-006:
+Passwords shall never be stored in plaintext.
+
+NFR-007:
+Authentication tokens shall be securely generated and validated.
+
+NFR-008:
+Protected API endpoints shall enforce authentication and authorization.
+
+NFR-009:
+The system shall implement RBAC.
+
+NFR-010:
+Student result data shall be private by default.
+
+NFR-011:
+The system shall prevent unauthorized access to another student's records.
+
+NFR-012:
+The system shall validate and sanitize user input.
+
+NFR-013:
+The system shall protect against common web vulnerabilities including:
+
+- SQL injection
+- Cross-site scripting
+- CSRF where applicable
+- Broken access control
+- Authentication attacks
+- Insecure direct object references
+
+NFR-014:
+Sensitive communication shall use HTTPS in production.
+
+NFR-015:
+Administrative actions shall be auditable.
+
+NFR-016:
+COLLEXA shall not be permitted to bypass backend authorization.
+
+NFR-017:
+LLM-generated tool parameters shall be validated by the backend before execution.
+
+
+4.3 Privacy
+
+NFR-018:
+The system shall collect only data required for its intended services.
+
+NFR-019:
+Sensitive student information shall not be unnecessarily included in chatbot responses.
+
+NFR-020:
+QR codes shall contain a minimal amount of sensitive information.
+
+NFR-021:
+Access to student information shall follow the configured KEC authorization policy.
+
+
+4.4 Availability and Reliability
+
+NFR-022:
+The system should be designed for continuous availability during normal college operations.
+
+NFR-023:
+The system shall handle temporary service failures gracefully.
+
+NFR-024:
+Database backup and recovery procedures should be implemented.
+
+NFR-025:
+Booking transactions shall be atomic.
+
+
+4.5 Usability
+
+NFR-026:
+The website shall be responsive on desktop, tablet, and mobile devices.
+
+NFR-027:
+The interface shall use clear navigation.
+
+NFR-028:
+COLLEXA shall provide understandable responses and error messages.
+
+NFR-029:
+Users shall be clearly informed before important actions are confirmed.
+
+NFR-030:
+The system should provide accessible UI elements and readable typography.
+
+
+4.6 Maintainability
+
+NFR-031:
+The backend shall use modular architecture.
+
+NFR-032:
+COLLEXA tools shall be separated from the presentation layer.
+
+NFR-033:
+The system shall use environment-based configuration for secrets and deployment settings.
+
+NFR-034:
+The codebase shall use version control.
+
+NFR-035:
+The project shall include API and system documentation.
+
+
+4.7 Scalability
+
+NFR-036:
+The system architecture should allow additional engineering programs.
+
+NFR-037:
+The system should support increasing numbers of students and bookings.
+
+NFR-038:
+Additional COLLEXA tools should be addable without redesigning the complete agent.
+
+NFR-039:
+The vector database should support growth of the KEC document collection.
+
+
+5. SYSTEM ARCHITECTURE
+
+5.1 Frontend
+
+Recommended technologies:
+
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+Major frontend sections:
+
+- Public website
+- COLLEXA interface
+- Student portal
+- Admin portal
+- Authentication pages
+- Seat booking interface
+- Appointment interface
+- Result interface
+- QR registration interface
+
+
+5.2 Backend
+
+Recommended technologies:
+
+- Python
+- FastAPI
+- SQLAlchemy or equivalent ORM
+- PostgreSQL
+
+Backend responsibilities:
+
+- Authentication
+- Authorization
+- Student services
+- Result services
+- Booking services
+- Appointment services
+- Registration services
+- QR generation
+- Admin services
+- COLLEXA tool APIs
+- Audit logging
+
+
+5.3 AI Layer
+
+Recommended technologies:
+
+- LangGraph
+- LangChain
+- Large Language Model
+- ChromaDB
+- Embedding model
+
+The AI layer shall contain:
+
+- Intent/route handling
+- Agent orchestration
+- RAG retrieval
+- Tool calling
+- Conversation state
+- Confirmation handling
+- Error handling
+
+
+5.4 Vector Database
+
+ChromaDB shall be used to store embeddings for approved KEC documents.
+
+Document pipeline:
+
+KEC Document
+    |
+    v
+Text Extraction
+    |
+    v
+Cleaning
+    |
+    v
+Chunking
+    |
+    v
+Embedding
+    |
+    v
+ChromaDB
+    |
+    v
+Retriever
+    |
+    v
+COLLEXA
+
+
+6. DATABASE REQUIREMENTS
+
+6.1 Core Entities
+
+The database should contain at least the following entities:
+
+Users
+Students
+Admins
+Faculty
+Programs
+Results
+Appointments
+Bookings
+Registrations
+Notices
+Documents
+Audit Logs
+
+
+6.2 Users Table
+
+Suggested fields:
+
+- id
+- email/username
+- password_hash
+- role
+- status
+- created_at
+- updated_at
+
+
+6.3 Students Table
+
+Suggested fields:
+
+- id
+- user_id
+- student_id
+- ioe_roll_no
+- name
+- program_id
+- batch
+- semester
+- contact
+- status
+
+
+6.4 Programs Table
+
+Suggested fields:
+
+- id
+- name
+- code
+- capacity
+- available_seats
+- status
+
+
+6.5 Results Table
+
+Suggested fields:
+
+- id
+- student_id
+- semester
+- subject
+- marks
+- grade
+- grade_point
+- updated_at
+
+
+6.6 Appointments Table
+
+Suggested fields:
+
+- id
+- student_id
+- faculty_id
+- appointment_date
+- appointment_time
+- purpose
+- status
+- created_at
+
+
+6.7 Bookings Table
+
+Suggested fields:
+
+- id
+- student_id
+- program_id
+- reservation_code
+- status
+- created_at
+- expires_at
+
+
+6.8 Registrations Table
+
+Suggested fields:
+
+- id
+- booking_id
+- registration_token
+- status
+- qr_reference
+- confirmed_at
+- created_at
+
+
+7. CORE USE CASES
+
+UC-001: Ask COLLEXA a General Question
+
+Actor:
+Public User
+
+Steps:
+
+1. User opens KEC website.
+2. User opens COLLEXA.
+3. User enters a question.
+4. COLLEXA identifies the query.
+5. COLLEXA retrieves relevant KEC information.
+6. COLLEXA generates an answer.
+7. User receives the response.
+
+
+UC-002: Student Checks Result
+
+Actor:
+Student
+
+Steps:
+
+1. Student logs in.
+2. Student opens COLLEXA or Results.
+3. Student requests a result.
+4. System verifies authenticated identity.
+5. Backend retrieves the student's result.
+6. Result is returned.
+7. Student views the result.
+
+
+UC-003: Book Appointment
+
+Actor:
+Student
+
+Steps:
+
+1. Student logs in.
+2. Student asks COLLEXA to book an appointment or opens Appointment module.
+3. System retrieves available slots.
+4. Student selects a slot.
+5. System validates availability.
+6. Appointment is created.
+7. Student receives confirmation.
+
+
+UC-004: Reserve Admission Seat
+
+Actor:
+Eligible User
+
+Steps:
+
+1. User views or asks COLLEXA about available programs.
+2. User selects a program.
+3. System checks available seats.
+4. System presents reservation information.
+5. User explicitly confirms reservation.
+6. System creates a temporary booking.
+7. System returns booking ID and expiration information.
+
+
+UC-005: Confirm Registration and Generate QR
+
+Actor:
+Eligible User
+
+Steps:
+
+1. User opens an active booking.
+2. System displays registration details.
+3. User explicitly confirms registration.
+4. Backend validates the booking.
+5. Registration is created.
+6. Unique registration token is generated.
+7. QR code is generated.
+8. User receives the registration QR.
+
+
+UC-006: Admin Updates Seat Availability
+
+Actor:
+Administrator
+
+Steps:
+
+1. Admin logs in.
+2. Admin opens program/seat management.
+3. Admin selects a program.
+4. Admin updates capacity according to authorization rules.
+5. System validates the value.
+6. System updates seat information.
+7. Action is logged.
+
+
+UC-007: Admin Uploads COLLEXA Document
+
+Actor:
+Administrator
+
+Steps:
+
+1. Admin logs in.
+2. Admin opens knowledge-base management.
+3. Admin uploads an approved document.
+4. System extracts text.
+5. System chunks the content.
+6. System generates embeddings.
+7. Embeddings are stored in ChromaDB.
+8. Document status is marked available.
+
+
+8. COLLEXA AGENT WORKFLOW
+
+The agent should use controlled routing.
+
+Example:
+
+User Query
+   |
+   v
+COLLEXA
+   |
+   v
+Intent Classification
+   |
+   +---- Public information ----> RAG
+   |
+   +---- Result ----------------> Authentication -> Result Tool
+   |
+   +---- Appointment -----------> Authentication -> Appointment Tool
+   |
+   +---- Seat availability -----> Seat Tool
+   |
+   +---- Seat booking ----------> Confirmation -> Booking Tool
+   |
+   +---- Registration ----------> Confirmation -> Registration Tool
+   |
+   +---- Admin operation -------> Admin Authentication -> Admin Tool
+
+
+9. BOOKING BUSINESS RULES
+
+BR-001:
+A booking shall only be created when a seat is available.
+
+BR-002:
+A user shall not create duplicate active bookings for the same restricted program unless explicitly permitted.
+
+BR-003:
+A temporary booking shall have an expiration time.
+
+BR-004:
+Expired bookings shall release their reserved seats.
+
+BR-005:
+A booking shall not become a confirmed registration without explicit confirmation.
+
+BR-006:
+A QR registration credential shall only be generated for a valid confirmed registration.
+
+BR-007:
+The system shall use transactional database operations when modifying seat availability.
+
+BR-008:
+The backend shall be the final authority for booking validity; COLLEXA shall not determine validity on its own.
+
+
+10. SECURITY AND AI SAFETY RULES
+
+SR-001:
+COLLEXA shall not directly access unrestricted database tables.
+
+SR-002:
+Every tool call shall be validated by the backend.
+
+SR-003:
+Authenticated operations shall use the authenticated user's identity rather than trusting identity values supplied solely by the LLM.
+
+SR-004:
+COLLEXA shall not disclose private student data to unauthorized users.
+
+SR-005:
+The system shall require confirmation for irreversible or consequential operations.
+
+SR-006:
+Prompt injection within uploaded documents shall not be allowed to override system permissions.
+
+SR-007:
+Retrieved documents shall be treated as data, not as privileged system instructions.
+
+SR-008:
+Administrative tools shall require administrator authorization independent of COLLEXA's decision.
+
+SR-009:
+Sensitive values shall not be included in logs unnecessarily.
+
+SR-010:
+Secrets and API keys shall be stored outside source code.
+
+
+11. API REQUIREMENTS
+
+Example API groups:
+
+Authentication:
+
+POST /api/auth/login
+POST /api/auth/logout
+POST /api/auth/refresh
+
+Students:
+
+GET /api/students/me
+GET /api/students/me/results
+GET /api/students/me/appointments
+
+Programs:
+
+GET /api/programs
+GET /api/programs/{id}/availability
+
+Bookings:
+
+POST /api/bookings
+GET /api/bookings/me
+DELETE /api/bookings/{id}
+
+Registration:
+
+POST /api/registrations/{booking_id}/confirm
+GET /api/registrations/{id}
+GET /api/registrations/{id}/qr
+GET /api/registrations/verify/{token}
+
+Appointments:
+
+GET /api/appointments/slots
+POST /api/appointments
+GET /api/appointments/me
+DELETE /api/appointments/{id}
+
+COLLEXA:
+
+POST /api/collexa/chat
+
+Admin:
+
+GET /api/admin/dashboard
+GET /api/admin/students
+POST /api/admin/students
+PUT /api/admin/students/{id}
+GET /api/admin/bookings
+PUT /api/admin/bookings/{id}
+GET /api/admin/appointments
+PUT /api/admin/appointments/{id}
+POST /api/admin/notices
+POST /api/admin/documents
+
+
+12. UI REQUIREMENTS
+
+12.1 Public Homepage
+
+The homepage should contain:
+
+- KEC branding
+- Navigation
+- Hero section
+- Programs
+- About section
+- Notices
+- College services
+- Contact information
+- COLLEXA launcher
+
+
+12.2 COLLEXA Interface
+
+The chat interface should provide:
+
+- Conversation history
+- Text input
+- Send button
+- Loading indicator
+- Tool/action status
+- Confirmation buttons
+- Error messages
+- Login prompt when required
+
+
+12.3 Student Portal
+
+The student portal should include:
+
+- Dashboard
+- Profile
+- Results
+- Appointments
+- Admission/Bookings
+- Registration QR
+- COLLEXA
+
+
+12.4 Admin Portal
+
+The admin portal should include:
+
+- Dashboard
+- Students
+- Results
+- Programs
+- Seats
+- Bookings
+- Registrations
+- Appointments
+- Notices
+- COLLEXA Knowledge Base
+- Audit Logs
+
+
+13. ERROR HANDLING
+
+The system shall provide clear errors for:
+
+- Invalid login
+- Unauthorized access
+- Student not found
+- Result unavailable
+- Appointment slot unavailable
+- Program unavailable
+- No seats available
+- Booking expired
+- Duplicate booking
+- Invalid registration
+- Invalid QR/token
+- Server/database failure
+- COLLEXA service failure
+
+The system shall not expose internal stack traces or sensitive technical information to end users.
+
+
+14. TESTING REQUIREMENTS
+
+The project shall include:
+
+14.1 Unit Testing
+
+Test:
+
+- Authentication
+- Result retrieval
+- Seat calculations
+- Booking rules
+- Registration
+- QR token validation
+- Agent tools
+
+
+14.2 Integration Testing
+
+Test:
+
+- Frontend/backend communication
+- Database operations
+- COLLEXA tool calling
+- RAG retrieval
+- Authentication + student services
+- Booking + seat inventory
+- Registration + QR generation
+
+
+14.3 Security Testing
+
+Test:
+
+- Unauthorized result access
+- Unauthorized admin access
+- IDOR vulnerabilities
+- SQL injection
+- XSS
+- Authentication bypass
+- Token manipulation
+- Prompt injection
+- Unauthorized COLLEXA tool execution
+
+
+14.4 Performance Testing
+
+Test:
+
+- Concurrent seat booking
+- Multiple COLLEXA users
+- Database load
+- RAG response latency
+- API response time
+
+
+15. DEPLOYMENT REQUIREMENTS
+
+Recommended deployment stack:
+
+Frontend:
+Next.js
+
+Backend:
+FastAPI
+
+Database:
+PostgreSQL
+
+Vector Database:
+ChromaDB
+
+AI:
+LangGraph + LangChain + selected LLM
+
+Containerization:
+Docker
+
+Reverse Proxy:
+Nginx
+
+Operating System:
+Linux server
+
+Production requirements:
+
+- HTTPS
+- Environment variables/secrets
+- Database backups
+- Monitoring/logging
+- Access controls
+- Secure firewall configuration
+
+
+16. FUTURE ENHANCEMENTS
+
+Potential future features include:
+
+- Online fee/payment integration
+- SMS notifications
+- Email notifications
+- Push notifications
+- Digital student ID
+- Attendance system
+- Exam schedule integration
+- Library services
+- Hostel services
+- Transport information
+- Faculty portal
+- Parent portal
+- Scholarship management
+- Online admission form
+- Document verification
+- Payment receipt generation
+- Voice interaction with COLLEXA
+- Nepali language support
+- Mobile application
+- Advanced analytics
+- Automated administrative workflows
+
+
+17. ACCEPTANCE CRITERIA
+
+The system shall be considered functionally acceptable when:
+
+1. A public user can browse KEC information.
+2. A public user can ask COLLEXA general KEC questions.
+3. COLLEXA can retrieve information from the approved KEC knowledge base.
+4. A student can securely log in.
+5. An authenticated student can view their own results.
+6. A student can book an available appointment.
+7. A user can view current program seat availability.
+8. An eligible user can reserve an available seat.
+9. A reservation can expire according to configured rules.
+10. A user must explicitly confirm before registration.
+11. A confirmed registration generates a valid QR credential.
+12. QR verification correctly identifies valid/invalid registrations.
+13. Administrators can manage students, results, programs, seats, bookings, appointments, and notices according to their permissions.
+14. Administrators can manage the COLLEXA knowledge base.
+15. Unauthorized users cannot access protected student/admin information.
+16. Concurrent seat booking does not cause inconsistent seat counts.
+17. Important transactional and administrative actions are auditable.
+
+
+18. RECOMMENDED INITIAL DEVELOPMENT MILESTONES
+
+Milestone 1:
+UI/UX design and public KEC website.
+
+Milestone 2:
+PostgreSQL schema and FastAPI backend.
+
+Milestone 3:
+Authentication and role-based access control.
+
+Milestone 4:
+Student dashboard and result system.
+
+Milestone 5:
+Appointment management.
+
+Milestone 6:
+Program and seat management.
+
+Milestone 7:
+Booking and reservation workflow.
+
+Milestone 8:
+Registration confirmation and QR verification.
+
+Milestone 9:
+COLLEXA RAG system.
+
+Milestone 10:
+COLLEXA tool integration with student, booking, appointment, and admission services.
+
+Milestone 11:
+Admin dashboard and knowledge-base management.
+
+Milestone 12:
+Testing, security hardening, Docker deployment, documentation, and production preparation.
+
+
+19. CONCLUSION
+
+The proposed KEC Smart Web Portal will provide a unified digital platform for public information, student services, admissions, appointments, administration, and AI-assisted interaction.
+
+COLLEXA will serve as the intelligent conversational layer of the platform while controlled backend APIs remain responsible for authentication, authorization, database access, transactional operations, and business rules.
+
+The separation between the AI agent and core backend services is a key architectural requirement. It allows COLLEXA to provide natural-language interaction without giving the language model unrestricted authority over sensitive student or administrative data.
+
+The system is intended to be modular and extensible so that additional KEC services can be integrated into COLLEXA in the future.
